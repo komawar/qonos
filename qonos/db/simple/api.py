@@ -48,7 +48,6 @@ def reset():
 
 def _gen_base_attributes():
     values = {}
-    values['id'] = str(uuid.uuid4())
     values['created_at'] = timeutils.utcnow()
     values['updated_at'] = timeutils.utcnow()
     return copy.deepcopy(values)
@@ -59,6 +58,24 @@ def _schedule_create(values):
     DATA['schedules'][values['id']] = values
     _schedule_meta_init(values['id'])
     return copy.deepcopy(values)
+
+
+def _do_pagination(schedules, marker, limit):
+    schedules = sorted(schedules, key=itemgetter('id'))
+    start = 0
+    end = -1
+    if marker is None:
+        start = 0
+    else:
+        for i, schedule in enumerate(schedules):
+            if schedule['id'] == marker:
+                start = i + 1
+                break
+        else:
+            raise exception.NotFound()
+
+    end = start + limit if limit is not None else None
+    return schedules[start:end]
 
 
 def schedule_get_all(filter_args={}):
@@ -113,6 +130,9 @@ def schedule_get_all(filter_args={}):
                 if schedule in schedules_mutate:
                     del schedules_mutate[schedules_mutate.index(schedule)]
 
+    marker = filter_args.get('marker')
+    limit = filter_args.get('limit')
+    schedules_mutate = _do_pagination(schedules_mutate, marker, limit)
     return schedules_mutate
 
 
