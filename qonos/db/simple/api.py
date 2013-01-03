@@ -275,6 +275,7 @@ def schedule_meta_delete(schedule_id, key):
     _check_meta_exists(schedule_id, key)
     _delete_schedule_meta(schedule_id, key)
 
+# Workers tests
 def worker_get_all(params={}):
     workers = copy.deepcopy(DATA['workers'].values())
     marker = params.get('marker')
@@ -304,7 +305,7 @@ def worker_delete(worker_id):
         raise exception.NotFound()
     del DATA['workers'][worker_id]
 
-
+#Jobs tests
 def job_create(job_values):
     global DATA
     db_utils.validate_job_values(job_values)
@@ -338,12 +339,16 @@ def job_create(job_values):
     return job_get_by_id(job['id'])
 
 
-def job_get_all():
+def job_get_all(params={}):
     jobs = copy.deepcopy(DATA['jobs'].values())
 
     for job in jobs:
         job['job_metadata'] =\
             job_meta_get_all_by_job_id(job['id'])
+
+    marker = params.get('marker')
+    limit = params.get('limit')
+    jobs = _do_pagination(jobs, marker, limit)
 
     return jobs
 

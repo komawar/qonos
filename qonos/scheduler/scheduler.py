@@ -71,10 +71,16 @@ class Scheduler(object):
             self.client.create_job(schedule['id'])
 
     def get_schedules(self, previous_run=None, current_run=None):
-        filter_args = {'next_run_before': current_run}
+        params = {'next_run_before': current_run}
 
         # TODO(ameade): change api to not require both query params
         year_one = timeutils.isotime(datetime.datetime(1970, 1, 1))
-        filter_args['next_run_after'] = previous_run or year_one
+        params['next_run_after'] = previous_run or year_one
 
-        return self.client.list_schedules(filter_args=filter_args)
+        schedules = []
+        schedules = self.client.list_schedules(filter_args=params)
+        while schedules.get('next_page'):
+            response = self.client.list_schedules(filter_args=params)
+            schedules = schedules.append(response)
+
+        return schedules

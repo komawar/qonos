@@ -62,23 +62,21 @@ class SchedulesController(object):
 
     def list(self, request):
         filter_args = self._get_request_params(request)
-        if filter_args.get('limit'):
-            limit = filter_args['limit']
-            limit = self._validate_limit(limit)
-            limit = min(CONF.api_limit_max, limit)
-            filter_args['limit'] = limit
-        else:
-            limit = CONF.limit_param_default
-            limit = self._validate_limit(limit)
-            limit = min(CONF.api_limit_max, limit)
-            filter_args['limit'] = limit
+        limit = filter_args.get('limit') or CONF.limit_param_default
+        limit = self._validate_limit(limit)
+        limit = min(CONF.api_limit_max, limit)
+        filter_args['limit'] = limit
         try:
             schedules = self.db_api.schedule_get_all(filter_args=filter_args)
+            if len(schedules) != 0 and len(schedules) == limit:
+                next_page = '/v1/schedules?marker=%s' % schedules[-1].get('id')
+            else:
+                next_page = None
         except exception.NotFound:
             msg = _('The specified marker could not be found')
             raise webob.exc.HTTPNotFound(explanation=msg)
         [utils.serialize_datetimes(sched) for sched in schedules]
-        return {'schedules': schedules}
+        return {'schedules': schedules, 'next_page': next_page}
 
     def _schedule_to_next_run(self, schedule):
         minute = schedule.get('minute', '*')
