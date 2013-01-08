@@ -58,7 +58,6 @@ class TestSchedulesApi(test_utils.BaseTestCase):
         self.schedule_3 = db_api.schedule_create(fixture)
         fixture = {
             'id': unit_utils.SCHEDULE_UUID4,
-            'id': UUID4,
             'tenant_id': unit_utils.TENANT4,
             'action': 'snapshot',
             'minute': '30',
