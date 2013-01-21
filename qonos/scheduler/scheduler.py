@@ -77,10 +77,12 @@ class Scheduler(object):
         year_one = timeutils.isotime(datetime.datetime(1970, 1, 1))
         params['next_run_after'] = previous_run or year_one
 
-        schedules = []
-        schedules = self.client.list_schedules(filter_args=params)
-        while schedules.get('next_page'):
+        response = self.client.list_schedules(filter_args=params)
+        schedules = response[0]
+        next_page = response[1]
+        while next_page:
             response = self.client.list_schedules(filter_args=params)
-            schedules = schedules.append(response)
+            schedules = schedules.append(response[0])
+            next_page = response[1]
 
         return schedules
