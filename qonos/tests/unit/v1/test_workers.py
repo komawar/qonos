@@ -268,7 +268,7 @@ class TestWorkersApi(test_utils.BaseTestCase):
                           self.controller.delete, request, worker_id)
 
     def test_get_next_job_unknown_worker_for_action(self):
-        request = unit_test_utils.get_fake_request(method='POST')
+        request = unit_utils.get_fake_request(method='POST')
         fixture = {'action': 'snapshot'}
         self.assertRaises(webob.exc.HTTPNotFound, self.controller.get_next_job,
                           request, 'unknown_worker_id', fixture)
@@ -276,8 +276,10 @@ class TestWorkersApi(test_utils.BaseTestCase):
     def test_get_next_job_none_for_action(self):
         request = unit_utils.get_fake_request(method='POST')
         fixture = {'action': 'dummy'}
-        self.assertRaises(webob.exc.HTTPNotFound, self.controller.get_next_job,
-                          request, self.worker_1['id'], fixture)
+        job = self.controller.get_next_job(request,
+                                           self.worker_1['id'],
+                                           fixture)
+        self.assertIsNone(job['job'])
 
     def test_get_next_job_for_action(self):
         request = unit_utils.get_fake_request(method='POST')

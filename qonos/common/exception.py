@@ -25,3 +25,7 @@ class Duplicate(QonosException):
 
 class MissingValue(QonosException):
     message = _('A required value was not provided')
+
+
+class BadRequest(QonosException):
+    message = _('The input provided was invalid.')

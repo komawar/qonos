@@ -46,9 +46,10 @@ def reset():
         DATA[k] = {}
 
 
-def _gen_base_attributes(ID=None):
+def _gen_base_attributes(id=None):
+#TODO(nikhil): id is python built-in, try to find a better variable name
     values = {}
-    if ID is None:
+    if id is None:
         values['id'] = str(uuid.uuid4())
     values['created_at'] = timeutils.utcnow()
     values['updated_at'] = timeutils.utcnow()
@@ -63,6 +64,12 @@ def _schedule_create(values):
 
 
 def _do_pagination(items, marker, limit):
+"""
+This method mocks the behavior of sqlalchemy paginate_query.
+It takes items and pagination parameters - 'limit' and 'marker' to filter out the
+items to be retured. Items are sorted in lexicographical order based on the key
+- 'id'.
+"""
     items = sorted(items, key=itemgetter('id'))
     start = 0
     end = -1
@@ -159,8 +166,8 @@ def schedule_create(schedule_values):
         del values['schedule_metadata']
 
     schedule.update(values)
-    ID = values.get('id')
-    schedule.update(_gen_base_attributes(ID=ID))
+    id = values.get('id')
+    schedule.update(_gen_base_attributes(id=id))
     schedule = _schedule_create(schedule)
 
     for metadatum in metadata:
@@ -293,8 +300,8 @@ def worker_create(values):
     global DATA
     worker = {}
     worker.update(values)
-    ID = values.get('id')
-    worker.update(_gen_base_attributes(ID=ID))
+    id = values.get('id')
+    worker.update(_gen_base_attributes(id=id))
     DATA['workers'][worker['id']] = worker
     return copy.deepcopy(worker)
 
@@ -328,8 +335,8 @@ def job_create(job_values):
         values['timeout'] = now + timedelta(seconds=job_timeout_seconds)
     values['hard_timeout'] = now + timedelta(seconds=job_timeout_seconds)
     job.update(values)
-    ID = values.get('id')
-    job.update(_gen_base_attributes(ID=ID))
+    id = values.get('id')
+    job.update(_gen_base_attributes(id=id))
 
     DATA['jobs'][job['id']] = job
 
