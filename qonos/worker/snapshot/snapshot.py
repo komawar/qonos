@@ -293,8 +293,8 @@ class SnapshotProcessor(worker.JobProcessor):
             # 'image.status.upper() == "ACTIVE"' is a temporary hack to
             # incorporate rm2400. Ideally, this filtering should be performed
             # by passing an appropriate filter to the novaclient.
-            if (metadata.get("org.openstack__1__created_by")
-                == "scheduled_images_service" and
+            if (metadata.get("org.openstack__1__created_by").
+                startswith("scheduled_images_service") and
                 metadata.get("instance_uuid") == instance_id and
                 image.status.upper() == "ACTIVE"):
                 scheduled_images.append(image)
